@@ -41,17 +41,17 @@ class Avatar extends React.Component {
               
     }
 
-    fetchData(id){
+    // fetchData(id){
         
-        data = {id:id}
+    //     data = {id:id}
 
-        axios.post("https://aatserver.herokuapp.com/api/findbyid",data)
-            .then(response => {
-                this.setState({userData:response.data})
-                console.log(this.state.userData)
-            })
+    //     axios.post("https://aatserver.herokuapp.com/api/findbyid",data)
+    //         .then(response => {
+    //             this.setState({userData:response.data})
+    //             console.log(this.state.userData)
+    //         })
         
-    }
+    // }
 
     _handleGoogleLogin = async () => {
         this.setState({ isButtonPressed: true })
@@ -81,16 +81,14 @@ class Avatar extends React.Component {
                         photoUrl: user.photoUrl
                     }
 
-                    store.dispatch({
+                    let res = async = store.dispatch({
                         type: "STORE_USER",
                         payload: info
-                      }).then(()=>{
+                      })
 
                         console.log(this.props.userInfo)
 
-                        this.fetchData(info.id)   
-                      })
-                 
+                        // this.fetchData(this.props.userInfo.id)
 
                     break;
                 }
