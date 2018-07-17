@@ -8,15 +8,19 @@ import { Ionicons } from '@expo/vector-icons';
 
 const ScheduleStack = createStackNavigator({
     Schedule: { screen: Schedule }    
-}
-)
+})
+
+const AvatarStack = createStackNavigator({
+    Avatar: { screen: Avatar }    
+})
+
 
 export default Tabs = createBottomTabNavigator(
 
     {    
+        Avatar: { screen: AvatarStack }, 
         Schedule: { screen: ScheduleStack }, 
-        Avatar: { screen: Avatar },               
-       
+
     },
     {
         navigationOptions: ({ navigation }) => ({            
