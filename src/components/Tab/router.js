@@ -17,11 +17,9 @@ const AvatarStack = createStackNavigator({
 
 export default Tabs = createBottomTabNavigator(
 
-    {    
+    {   
+        Avatar: { screen: AvatarStack },  
         Schedule: { screen: ScheduleStack }, 
-        Avatar: { screen: AvatarStack }, 
-
-
     },
     {
         navigationOptions: ({ navigation }) => ({            
