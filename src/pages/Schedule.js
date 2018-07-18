@@ -5,6 +5,8 @@ import store from '../../store'
 import axios from 'axios'
 import { SegmentedControls } from 'react-native-radio-buttons'
 import Modal from 'react-native-modal';
+import { Ionicons } from '@expo/vector-icons'
+import { Google } from 'expo';
 
 let mapStateToProps = (store) => {
     return {
@@ -33,6 +35,7 @@ class Schedule extends React.Component {
             surveyA1: {},
             surveyA2: {},
             visibleModal: null,
+            isSurveyReady: false,
         }
     }
 
@@ -51,11 +54,76 @@ class Schedule extends React.Component {
         }
     }
 
+    
+    _handleGoogleLogin = async () => {
+        this.setState({ isButtonPressed: true })
+        try {
+            const { type, user } = await Google.logInAsync({
+                // androidStandaloneAppClientId: 'null',
+                // iosStandaloneAppClientId: 'null',
+                androidClientId: "760596499772-5iok8om0kboc9e5g5f3ncj9ist99mkr8.apps.googleusercontent.com",
+                iosClientId: "760596499772-rr3hiui3lfg5n22ib29kies5uiscucal.apps.googleusercontent.com",
+                scopes: ['profile', 'email']
+            });
+
+            switch (type) {
+                case 'success': {
+                    Alert.alert(
+                        'Logged in!',
+                        `Hi ${user.name}!`,
+                    );
+
+                    const info = {
+                        name: {
+                            familyName: user.familyName,
+                            givenName: user.givenName
+                        },
+                        id: user.id,
+                        email: user.email,
+                        photoUrl: user.photoUrl
+                    }
+
+                    let res = async = store.dispatch({
+                        type: "STORE_USER",
+                        payload: info
+                      })
+
+                        console.log(this.props.userInfo)
+
+                        // this.fetchData(this.props.userInfo.id)
+
+                    break;
+                }
+                case 'cancel': {
+                    Alert.alert(
+                        'Cancelled!',
+                        'Login was cancelled!',
+                    );
+                    break;
+                }
+                default: {
+                    Alert.alert(
+                        'Oops!',
+                        'Login failed!',
+                        'default',
+                    );
+                }
+            }
+        } catch (e) {
+            Alert.alert(
+                'Oops!',
+                'Login failed!',
+                'error',
+            );
+        }
+    };
+
     fetchingSurvey() {
         console.log("fetching survey")
         axios.get("https://aatserver.herokuapp.com/api/survey")
             .then(response => {
-                // console.log(response.data)
+                console.log(response.data)
+                this.setState({ isSurveyReady: true })
                 this.setState({ surveyQs: response.data[0] })
                 console.log(this.state.surveyQs)
 
@@ -99,8 +167,11 @@ class Schedule extends React.Component {
     }
 
     sendPost() {
-        if (this.props.isSignedIn) {
-            this.setState({ visibleModal: 3 })       
+        if (this.props.isSignedIn && !this.state.isSent) {
+            this.setState({ visibleModal: 3 })
+        }
+        else if (this.props.isSignedIn && this.state.isSent){
+            Alert.alert("Your schedule was already sent")
         }
         else {
             Alert.alert("Please sign in")
@@ -110,7 +181,7 @@ class Schedule extends React.Component {
 
     }
 
-    postingData(){
+    postingData() {
         console.log(this.state.surveyA1)
         console.log(this.state.surveyA2)
 
@@ -122,10 +193,10 @@ class Schedule extends React.Component {
             name: `${userInfo.name.givenName}, ${userInfo.name.familyName}`,
             schedule: schedule,
             surveyQA: {
-                q1:this.state.surveyA1.question,
-                c1:this.state.surveyA1.choice,
-                q2:this.state.surveyA2.question,
-                c2:this.state.surveyA2.choice,
+                q1: this.state.surveyA1.question,
+                c1: this.state.surveyA1.choice,
+                q2: this.state.surveyA2.question,
+                c2: this.state.surveyA2.choice,
             }
         }
 
@@ -262,13 +333,6 @@ class Schedule extends React.Component {
                             <Text style={styles.modalText}>{surveyQs.q1.c5}</Text>
                         </View>
                     </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => { this.setState({ visibleModal: null }) }}>
-                        <View style={styles.modalButton}>
-                            <Text style={styles.modalText}>cancel</Text>
-                        </View>
-                    </TouchableOpacity>
-
                 </View>
             </Modal>
         )
@@ -288,7 +352,7 @@ class Schedule extends React.Component {
                             surveyA2: {
                                 question: surveyQs.q2.q,
                                 choice: surveyQs.q2.c1
-                            }                        
+                            }
                         })
                     }}
                     >
@@ -352,15 +416,6 @@ class Schedule extends React.Component {
                             <Text style={styles.modalText}>{surveyQs.q2.c5}</Text>
                         </View>
                     </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => {
-                        this.setState({ visibleModal: null })
-                    }}>
-                        <View style={styles.modalButton}>
-                            <Text style={styles.modalText}>cancel</Text>
-                        </View>
-                    </TouchableOpacity>
-
                 </View>
             </Modal>
         )
@@ -372,7 +427,7 @@ class Schedule extends React.Component {
                 <View style={styles.modalContent}>
                     <Text>Would you like to send?</Text>
 
-                    <TouchableOpacity onPress={()=>{
+                    <TouchableOpacity onPress={() => {
                         this.setState({ visibleModal: 1 })
                     }}
                     >
@@ -400,11 +455,11 @@ class Schedule extends React.Component {
                 <View style={styles.modalContent}>
                     <Text>Review Survey</Text>
                     <Text>{`Question 1: ${this.state.surveyA1.question}`}</Text>
-                    <Text style={{marginBottom:5}}>{`Your answer: ${this.state.surveyA1.choice}`}</Text>                    
+                    <Text style={{ marginBottom: 5 }}>{`Your answer: ${this.state.surveyA1.choice}`}</Text>
                     <Text>{`Question 2: ${this.state.surveyA2.question}`}</Text>
                     <Text>{`Your answer: ${this.state.surveyA2.choice}`}</Text>
 
-                    <TouchableOpacity onPress={()=>{                        
+                    <TouchableOpacity onPress={() => {
                         this.postingData()
                     }}
                     >
@@ -434,16 +489,24 @@ class Schedule extends React.Component {
 
             if (this.state.isTimeArray) {
 
+                if (this.state.isSurveyReady) {
+                    return (
+                        <ScrollView>
+
+                            {this.printRow()}
+                            {this.qOneModal()}
+                            {this.qTwoModal()}
+                            {this.sendingModal()}
+                            {this.reviewModal()}
+
+                        </ScrollView>
+                    )
+                }
+
                 return (
-                    <ScrollView>
-
-                        {this.printRow()}
-                        {this.qOneModal()}
-                        {this.qTwoModal()}
-                        {this.sendingModal()}
-                        {this.reviewModal()}
-
-                    </ScrollView>
+                    <View>
+                        <Text>Loading</Text>
+                    </View>
                 )
             }
 
@@ -451,8 +514,6 @@ class Schedule extends React.Component {
                 <View>
                     <Text>Loading</Text>
                 </View>
-
-
             )
         }
 
@@ -468,6 +529,14 @@ class Schedule extends React.Component {
         return (
             <View style={styles.container}>
                 <Text>Please sign in to begin</Text>
+
+                <TouchableOpacity style={{ width: 230, height: 50, backgroundColor: "tomato", borderColor: "#800000", borderWidth: 1 }} onPress={this._handleGoogleLogin.bind(this)}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 5 }}>
+                        <Ionicons name="logo-google" size={35} color="white" />
+                        <Text style={{ fontSize: 16, color: "white", marginLeft: 5, fontWeight: "bold" }}>Login Using Google </Text>
+                    </View>
+                </TouchableOpacity>
+
             </View>
 
         )

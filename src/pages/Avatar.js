@@ -37,84 +37,7 @@ class Avatar extends React.Component {
         }
     }
 
-    componentDidMount(){
-              
-    }
 
-    // fetchData(id){
-        
-    //     data = {id:id}
-
-    //     axios.post("https://aatserver.herokuapp.com/api/findbyid",data)
-    //         .then(response => {
-    //             this.setState({userData:response.data})
-    //             console.log(this.state.userData)
-    //         })
-        
-    // }
-
-    _handleGoogleLogin = async () => {
-        this.setState({ isButtonPressed: true })
-        try {
-            const { type, user } = await Google.logInAsync({
-                // androidStandaloneAppClientId: 'null',
-                // iosStandaloneAppClientId: 'null',
-                androidClientId: "760596499772-5iok8om0kboc9e5g5f3ncj9ist99mkr8.apps.googleusercontent.com",
-                iosClientId: "760596499772-rr3hiui3lfg5n22ib29kies5uiscucal.apps.googleusercontent.com",
-                scopes: ['profile', 'email']
-            });
-
-            switch (type) {
-                case 'success': {
-                    Alert.alert(
-                        'Logged in!',
-                        `Hi ${user.name}!`,
-                    );
-
-                    const info = {
-                        name: {
-                            familyName: user.familyName,
-                            givenName: user.givenName
-                        },
-                        id: user.id,
-                        email: user.email,
-                        photoUrl: user.photoUrl
-                    }
-
-                    let res = async = store.dispatch({
-                        type: "STORE_USER",
-                        payload: info
-                      })
-
-                        console.log(this.props.userInfo)
-
-                        // this.fetchData(this.props.userInfo.id)
-
-                    break;
-                }
-                case 'cancel': {
-                    Alert.alert(
-                        'Cancelled!',
-                        'Login was cancelled!',
-                    );
-                    break;
-                }
-                default: {
-                    Alert.alert(
-                        'Oops!',
-                        'Login failed!',
-                        'default',
-                    );
-                }
-            }
-        } catch (e) {
-            Alert.alert(
-                'Oops!',
-                'Login failed!',
-                'error',
-            );
-        }
-    };
 
 
     render() {
@@ -145,12 +68,7 @@ class Avatar extends React.Component {
 
         return (
             <View style={styles.container}>
-                <TouchableOpacity style={{ width: 230, height: 50, backgroundColor: "tomato", borderColor: "#800000", borderWidth: 1 }} onPress={this._handleGoogleLogin.bind(this)}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 5 }}>
-                        <Ionicons name="logo-google" size={35} color="white" />
-                        <Text style={{ fontSize: 16, color: "white", marginLeft: 5, fontWeight: "bold" }}>Login Using Google </Text>
-                    </View>
-                </TouchableOpacity>
+                <Text>Please sign in to begin</Text>
             </View>
         )
 
